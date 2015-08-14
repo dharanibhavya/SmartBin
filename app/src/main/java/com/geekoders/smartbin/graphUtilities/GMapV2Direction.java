@@ -40,7 +40,6 @@ public class GMapV2Direction
                             LatLng end,
                             String mode,
                             final GoogleMapViewFragment mainActivity,
-                            final String method,
                             final int i,
                             final int j)
     {
@@ -81,12 +80,7 @@ public class GMapV2Direction
 
             protected void onPostExecute(Document result)
             {
-                if (method.equals("generateAdjacencyMatrix")) {
                     mainActivity.OnGetDistanceDocumentComplete(result, i, j);
-                }
-                else{
-                    mainActivity.OnGetDocumentComplete(result);
-                }
             }
 
         }.execute();

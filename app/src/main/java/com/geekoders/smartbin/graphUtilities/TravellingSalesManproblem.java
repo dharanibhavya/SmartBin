@@ -68,6 +68,7 @@ public class TravellingSalesManproblem {
         // "home" vertex
 //        System.out.println("Tour cost: " + result);
 //        System.out.println("Tour path: ");
+        paths.add(0);
         getpath(1, npow - 2);
         return paths;
     }

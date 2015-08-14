@@ -32,7 +32,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -196,8 +195,7 @@ public class GoogleMapViewFragment extends Fragment {
                         md.getDocument(new LatLng(vertices.get(i).getLatitude(), vertices.get(i).getLongitude()),
                                 new LatLng(vertices.get(j).getLatitude(), vertices.get(j).getLongitude()),
                                 GMapV2Direction.MODE_DRIVING,
-                                this,
-                                "generateAdjacencyMatrix", i, j);
+                                this, i, j);
                     }
                 }
             }
@@ -206,7 +204,6 @@ public class GoogleMapViewFragment extends Fragment {
 
 
     public void OnGetDistanceDocumentComplete(Document doc, int i, int j) {
-
         int distance = md.getDistanceValue(doc);
         adj[i][j] = distance;
         docAdj[i][j] = doc;
@@ -218,34 +215,13 @@ public class GoogleMapViewFragment extends Fragment {
     private void findOptimalPath() {
         tsp = new TravellingSalesManproblem(vertices.size(), adj);
         List<Integer> pathVertex = tsp.execute();
-        path.add(vertices.get(0));
-        for (Integer i : pathVertex) {
-            path.add(vertices.get(i));
-        }
-        showOptimalPath();
-    }
-
-    private void showOptimalPath() {
-
-        for (int i = 0; i < path.size(); i++) {
-            if (i + 1 < path.size()) {
-                md.getDocument(new LatLng(path.get(i).getLatitude(), path.get(i).getLongitude()),
-                        new LatLng(path.get(i + 1).getLatitude(), path.get(i + 1).getLongitude()),
-                        GMapV2Direction.MODE_DRIVING,
-                        this,
-                        "showOptimalPath", 0, 0);
-            }
+        for (int i = 0; i < pathVertex.size() - 1; i++) {
+            showOptimalPath(docAdj[pathVertex.get(i)][pathVertex.get(i + 1)]);
         }
     }
 
-    private double round(double unrounded, int precision, int roundingMode) {
-        BigDecimal bd = new BigDecimal(unrounded);
-        BigDecimal rounded = bd.setScale(precision, roundingMode);
-        return rounded.doubleValue();
-    }
 
-    public void OnGetDocumentComplete(Document doc) {
-
+    public void showOptimalPath(Document doc) {
         ArrayList<LatLng> directionPoint = md.getDirection(doc);
         PolylineOptions rectLine = new PolylineOptions().width(8)
                 .color(Color.BLUE);
@@ -255,5 +231,4 @@ public class GoogleMapViewFragment extends Fragment {
         }
         googleMap.addPolyline(rectLine);
     }
-
 }
