@@ -48,9 +48,9 @@ public class GoogleMapViewFragment extends Fragment {
 
     private List<Vertex> path = new LinkedList<Vertex>();
 
-    private List<Document> documentList = new ArrayList<Document>();
-
     private int adj[][];
+
+    private Document docAdj[][];
 
     private RequestQueue queue;
 
@@ -117,7 +117,7 @@ public class GoogleMapViewFragment extends Fragment {
      */
     private void makeJsonObjectRequest() {
         // json object response url
-        final String urlJsonObj = "http://10.134.41.166:8080/TrackServer/track/bins/getLocations";
+        final String urlJsonObj = "http://10.134.116.252:8080/TrackServer/track/bins/getLocations";
 //        final String urlJsonObj = "http://192.168.1.100:8080/TrackServer/track/bins/getLocations";
 
         JsonObjectRequest jsonObjReq = new JsonObjectRequest(Method.GET,
@@ -140,10 +140,9 @@ public class GoogleMapViewFragment extends Fragment {
                             .newCameraPosition(cameraPosition));
 
                     adj = new int[vertices.size()][vertices.size()];
+                    docAdj = new Document[vertices.size()][vertices.size()];
 
                     generateAdjacencyMatrix();
-                    findOptimalPath();
-                    showOptimalPath();
 
 
                 } catch (JSONException e) {
@@ -210,6 +209,10 @@ public class GoogleMapViewFragment extends Fragment {
 
         int distance = md.getDistanceValue(doc);
         adj[i][j] = distance;
+        docAdj[i][j] = doc;
+        if (i == vertices.size() - 1 && j == vertices.size() - 2) {
+            findOptimalPath();
+        }
     }
 
     private void findOptimalPath() {
@@ -219,6 +222,7 @@ public class GoogleMapViewFragment extends Fragment {
         for (Integer i : pathVertex) {
             path.add(vertices.get(i));
         }
+        showOptimalPath();
     }
 
     private void showOptimalPath() {

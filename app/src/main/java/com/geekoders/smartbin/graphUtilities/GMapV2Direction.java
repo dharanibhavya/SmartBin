@@ -81,12 +81,13 @@ public class GMapV2Direction
 
             protected void onPostExecute(Document result)
             {
-                if(method.equals("generateAdjacencyMatrix"))
-                mainActivity.OnGetDistanceDocumentComplete(result,i,j);
+                if (method.equals("generateAdjacencyMatrix")) {
+                    mainActivity.OnGetDistanceDocumentComplete(result, i, j);
+                }
                 else{
                     mainActivity.OnGetDocumentComplete(result);
                 }
-            };
+            }
 
         }.execute();
 
