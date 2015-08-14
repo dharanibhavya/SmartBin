@@ -1,0 +1,59 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
+        <!-- Customize your theme here. -->
+    </style>
+
+    <style name="AppBaseTheme" parent="Theme.AppCompat.Light">
+        <item name="colorPrimary">@color/bg_blue_flat</item>
+        <item name="colorPrimaryDark">@color/primaryColorDark</item>
+        <item name="colorAccent">@color/white</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowActionBar">true</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="windowActionBarOverlay">true</item>
+        <item name="android:titleTextStyle">@style/ActionBarTitleText</item>
+        <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
+        <item name="actionMenuTextColor">@color/abc_primary_text_material_light</item>
+        <item name="android:editTextStyle">@style/customEditText</item>
+    </style>
+
+    <style name="customEditText" parent="@android:style/Widget.Holo.Light.EditText">
+        <item name="android:background">@android:drawable/editbox_background_normal</item>
+        <item name="android:textCursorDrawable">@color/bg_blue_flat</item>
+    </style>
+
+    <style name="ActionBarTitleText" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textColorSecondary">@android:color/white</item>
+        <!-- The textColor property is backward compatible with the Support Library -->
+    </style>
+
+    <style name="DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="spinBars">true</item>
+        <item name="color">@android:color/white</item>
+    </style>
+
+    <style name="floatlabelededittext">
+        <item name="android:textColor">@color/side_text_color</item>
+    </style>
+
+    <style name="menu_labels_style">
+        <item name="android:background">@color/bg_blue_flat</item>
+        <item name="android:padding">5dp</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <color name="bg_blue_flat">#344A5E</color>
+    <color name="ldrawer_color">#2c3e50</color>
+    <color name="hint_color">#AAD4EF</color>
+    <color name="primaryColorDark">#212E3D</color>
+    <color name="white">#fafafa</color>
+    <color name="white_button_pressed">#E1E1E1</color>
+    <color name="text_color">#B2BBC4</color>
+    <color name="side_text_color">#2B404A</color>
+    <color name="toolbar_bg">#2A94D6</color>
+    <color name="color_semi_transparent_black">#B3000000</color>
+
+</resources>

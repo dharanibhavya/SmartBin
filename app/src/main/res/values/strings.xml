@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">SmartBin</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_dashboard">Dashboard</string>
+    <string name="action_export">Export</string>
+    <string name="action_password_lock">Password Lock</string>
+    <string name="analytics">Analytics</string>
+    <string name="optimalRoute">OptimalRoute</string>
+    <string name="binDetails">BinDetails</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Bin Details Fragment</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="map_fragment">Map Fragment</string>
+
+</resources>

@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" tools:context=".MainPageActivity">
+    <item android:id="@+id/action_dashboard" android:title="@string/action_dashboard"
+        android:orderInCategory="100" app:showAsAction="never"/>
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"/>
+    <item android:id="@+id/action_export" android:title="@string/action_export"
+        android:orderInCategory="100" app:showAsAction="never" />
+    <item android:id="@+id/action_password_lock" android:title="@string/action_password_lock"
+        android:orderInCategory="100" app:showAsAction="never" />
+    <item android:id="@+id/action_settings" android:title="@string/action_settings"
+        android:orderInCategory="100" app:showAsAction="never" />
+</menu>
