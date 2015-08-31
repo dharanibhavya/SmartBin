@@ -8,6 +8,8 @@
     <string name="analytics">Analytics</string>
     <string name="optimalRoute">OptimalRoute</string>
     <string name="binDetails">BinDetails</string>
+    <string name="str_btn_find">Find</string>
+    <string name="hnt_et_location">Enter location</string>
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Bin Details Fragment</string>

@@ -1,11 +1,14 @@
 package com.geekoders.smartbin;
 
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.android.volley.Request.Method;
@@ -17,6 +20,10 @@ import com.android.volley.toolbox.Volley;
 import com.geekoders.smartbin.graphUtilities.GMapV2Direction;
 import com.geekoders.smartbin.graphUtilities.TravellingSalesManproblem;
 import com.geekoders.smartbin.graphUtilities.Vertex;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -33,19 +40,28 @@ import org.json.JSONObject;
 import org.w3c.dom.Document;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by kovbh01 on 8/5/2015.
  */
-public class GoogleMapViewFragment extends Fragment {
+public class GoogleMapViewFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+
+    // LogCat tag
+    private static final String TAG = GoogleMapViewFragment.class.getSimpleName();
+
+    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1000;
+
+    private AtomicInteger counter = new AtomicInteger();
+
+    private Location mLastLocation;
+
+    private GoogleApiClient mGoogleApiClient;
 
     private GMapV2Direction md;
 
     private List<Vertex> vertices = new ArrayList<Vertex>();
-
-    private List<Vertex> path = new LinkedList<Vertex>();
 
     private int adj[][];
 
@@ -58,6 +74,8 @@ public class GoogleMapViewFragment extends Fragment {
     private GoogleMap googleMap;
 
     private TravellingSalesManproblem tsp;
+
+    private EditText etLocation;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -82,14 +100,42 @@ public class GoogleMapViewFragment extends Fragment {
 
         googleMap = mMapView.getMap();
 
+        googleMap.setMyLocationEnabled(true);
+
+        if (checkPlayServices()) {
+
+            // Building the GoogleApi client
+            buildGoogleApiClient();
+        }
         makeJsonObjectRequest();
 
         return v;
+
+//        Button btn_find = (Button) v.findViewById(R.id.button);
+//        etLocation = (EditText) v.findViewById(R.id.startLocation);
+//
+//        // Defining button click event listener for the find button
+//        OnClickListener findClickListener = new OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                // Getting user input location
+//                String location = etLocation.getText().toString();
+//
+//                if(location!=null && !location.equals("")){
+//                    new GeocoderTask().execute(location);
+//                }else{
+//                    makeJsonObjectRequest();
+//                }
+//            }
+//        };
+//        btn_find.setOnClickListener(findClickListener);
+
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        checkPlayServices();
         mMapView.onResume();
     }
 
@@ -115,9 +161,8 @@ public class GoogleMapViewFragment extends Fragment {
      * Method to make json object request where json response starts wtih {
      */
     private void makeJsonObjectRequest() {
-        // json object response url
-        final String urlJsonObj = "http://10.134.116.252:8080/TrackServer/track/bins/getLocations";
-//        final String urlJsonObj = "http://192.168.1.100:8080/TrackServer/track/bins/getLocations";
+        final String urlJsonObj = "http://10.134.116.252:8080/TrackBins/track/bins/getLocations";
+//        final String urlJsonObj = "http://192.168.1.103:8080/TrackBins/track/bins/getLocations";
 
         JsonObjectRequest jsonObjReq = new JsonObjectRequest(Method.GET,
                 urlJsonObj, (String) null, new Response.Listener<JSONObject>() {
@@ -133,11 +178,6 @@ public class GoogleMapViewFragment extends Fragment {
                         double percent = objects.getDouble("percent");
                         addMarker(latitude, longitude, percent);
                     }
-                    CameraPosition cameraPosition = new CameraPosition.Builder()
-                            .target(new LatLng(17.45, 78.45)).zoom(12).build();
-                    googleMap.animateCamera(CameraUpdateFactory
-                            .newCameraPosition(cameraPosition));
-
                     adj = new int[vertices.size()][vertices.size()];
                     docAdj = new Document[vertices.size()][vertices.size()];
 
@@ -207,12 +247,14 @@ public class GoogleMapViewFragment extends Fragment {
         int distance = md.getDistanceValue(doc);
         adj[i][j] = distance;
         docAdj[i][j] = doc;
-        if (i == vertices.size() - 1 && j == vertices.size() - 2) {
+
+        if ((vertices.size() * vertices.size()) - vertices.size() == counter.incrementAndGet()) {
             findOptimalPath();
         }
     }
 
     private void findOptimalPath() {
+        Toast.makeText(getActivity().getApplicationContext(), "Finding optimal path", Toast.LENGTH_SHORT).show();
         tsp = new TravellingSalesManproblem(vertices.size(), adj);
         List<Integer> pathVertex = tsp.execute();
         for (int i = 0; i < pathVertex.size() - 1; i++) {
@@ -231,4 +273,122 @@ public class GoogleMapViewFragment extends Fragment {
         }
         googleMap.addPolyline(rectLine);
     }
+
+    /**
+     * Method to display the location on UI
+     */
+    private void displayLocation() {
+
+        mLastLocation = LocationServices.FusedLocationApi
+                .getLastLocation(mGoogleApiClient);
+
+        if (mLastLocation != null) {
+            vertices.add(new Vertex(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
+            CameraPosition cameraPosition = new CameraPosition.Builder()
+                    .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())).zoom(12).build();
+            googleMap.animateCamera(CameraUpdateFactory
+                    .newCameraPosition(cameraPosition));
+        } else {
+            Toast.makeText(getActivity().getApplicationContext(), "(Couldn't get the location. Make sure location is enabled on the device)", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Creating google api client object
+     */
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(getActivity().getApplicationContext())
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API).build();
+    }
+
+    /**
+     * Method to verify google play services on the device
+     */
+    private boolean checkPlayServices() {
+        int resultCode = GooglePlayServicesUtil
+                .isGooglePlayServicesAvailable(getActivity().getApplicationContext());
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+                GooglePlayServicesUtil.getErrorDialog(resultCode, getActivity(),
+                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
+            } else {
+                Toast.makeText(getActivity().getApplicationContext(),
+                        "This device is not supported.", Toast.LENGTH_LONG)
+                        .show();
+            }
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.connect();
+        }
+    }
+
+    /**
+     * Google api callback methods
+     */
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
+        Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = "
+                + result.getErrorCode());
+    }
+
+    @Override
+    public void onConnected(Bundle arg0) {
+        displayLocation();
+    }
+
+    @Override
+    public void onConnectionSuspended(int arg0) {
+        mGoogleApiClient.connect();
+    }
+
+//    private class GeocoderTask extends AsyncTask<String, Void, List<Address>> {
+//
+//        @Override
+//        protected List<Address> doInBackground(String... locationName) {
+//            // Creating an instance of Geocoder class
+//            Geocoder geocoder = new Geocoder(getActivity().getBaseContext());
+//            List<Address> addresses = null;
+//
+//            try {
+//                // Getting a maximum of 3 Address that matches the input text
+//                addresses = geocoder.getFromLocationName(locationName[0], 3);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            return addresses;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(List<Address> addresses) {
+//
+//            if (addresses == null || addresses.size() == 0) {
+//                Toast.makeText(getActivity().getBaseContext(), "No Location found", Toast.LENGTH_SHORT).show();
+//            }
+//
+//            // Clears all the existing markers on the map
+//            googleMap.clear();
+//
+//            // Adding Markers on Google Map for each matching address
+//            for (int i = 0; i < addresses.size(); i++) {
+//
+//                Address address = addresses.get(i);
+//                if (i == 0){
+//                CameraPosition cameraPosition = new CameraPosition.Builder()
+//                        .target(new LatLng(address.getLatitude(), address.getLongitude())).zoom(12).build();
+//                googleMap.animateCamera(CameraUpdateFactory
+//                        .newCameraPosition(cameraPosition));}
+//
+//            }
+////            makeJsonObjectRequest();
+//        }
+//    }
 }
